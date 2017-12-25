@@ -1,0 +1,40 @@
+# Webstack PHP
+nginx:
+  image: nginx:stable
+  volumes:
+    - ./logs/nginx/:/var/log/nginx
+    - ./config/nginx/:/etc/nginx/conf.d
+    - ./www:/var/www/app/
+  links:
+    - php:fpm
+  ports:
+    - 80:8080
+
+php:
+    build: container/php
+    links:
+      - db:ipssi_mysql
+    volumes:
+        - ./app:/var/www/app/var/logs
+        - ./config/php:/usr/local/etc/php/conf.d
+        - ./www:/var/www/app/
+
+db:
+    image: mysql:5.5
+    ports:
+      - 3306:3306
+    volumes:
+      - ./config/mysql:/etc/mysql/conf.d:ro
+      - ./config/mysql/data:/data
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:db
+    ports:
+      - 8000:80
+    environment:
+      PMA_USER : root
+      PMA_PASSWORD : root
